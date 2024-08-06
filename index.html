@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Couleurs SVG</title>
+    <style>
+        /* CSS de base pour l'agencement */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #svgContainer {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            /*padding: 10mm; /* Pour éviter que les SVG touchent les bords */
+        }
+
+        /* Ajustement de chaque SVG dans la grille */
+        #svgContainer div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #svgContainer svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Styles supplémentaires pour le formulaire */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        form label, form input {
+            margin: 5px;
+            width: 100%;
+        }
+
+        #displayform, #displayresult {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .qrcode, .image {
+            display: flex;
+            max-width: 50vw;
+        }
+
+        .image > *, .qrcode > * {
+            width: 100%;
+        }
+
+        .image img {
+            margin: auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Éditeur de Couleurs SVG</h1>
+
+    <!-- Formulaire pour changer les paramètres -->
+<div id="displayform">
+    <div class="qrcode">
+    <form>
+        <label for="color">Couleur QrCode:</label>
+        <input type="color" id="color" value="#000000">
+
+        <label for="colorback">Couleur fond:</label>
+        <input type="color" id="colorback" value="#FFFFFF">
+
+        <!--<label for="rows">Nombre de lignes:</label>
+        <input type="number" id="rows" value="2" min="1">
+        
+        <label for="columns">Nombre de colonnes:</label>
+        <input type="number" id="columns" value="2" min="1"> -->
+    <!--<form>
+
+        <button type="button" id="generateBtn">Générer les SVGs</button>
+    --></form>
+    </div>
+
+    <div class="image">
+    <!-- Formulaire pour télécharger une image -->
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="image/*" />
+        <button type="button" id="uploadBtn">Visualiser l'image</button>
+    </form>
+    </div>
+</div>
+
+    <!-- Bouton pour télécharger la page -->
+    <button id="downloadBtn">Télécharger le Qrcode</button>
+
+    <!-- Zone de téléchargement final -->
+    <a id="downloadLink" style="display:none;">Télécharger</a>
+
+<div id="displayresult">
+
+    <!-- Conteneur pour afficher les SVGs -->
+    <div id="svgContainer" class="qrcode"></div>
+
+    <!-- Zone de prévisualisation de l'image -->
+    <div id="imagePreview" class="image">
+        <img id="previewImg" src="" alt="Prévisualisation de l'image">
+    </div>
+</div>   
+
+    <script>
+        // Référence du SVG à utiliser
+        const svgTemplate = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+width="1155px" height="1155px" viewBox="0 0 1155 1155" enable-background="new 0 0 1155 1155" xml:space="preserve">
+<rect id="background" x="0" y="0" width="1155" height="1155" fill="rgba(255,255,255,0)" /><g transform="translate(70,70)"><g transform="translate(350,0) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,0) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,0) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(490,0) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,0) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,0) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,35) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,35) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,35) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,70) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,70) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,70) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(490,70) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,70) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,70) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,70) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,105) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,105) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,105) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(560,105) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,105) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,105) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,140) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,140) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(560,140) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,140) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,175) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,175) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,175) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,175) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,175) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,175) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,210) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,210) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,210) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(490,210) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(560,210) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,210) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,210) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,245) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,245) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,245) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(490,245) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,245) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,245) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,245) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(140,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(175,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(210,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(245,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(560,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(770,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,280) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(35,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(70,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(105,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(245,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,315) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,350) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(105,350) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(175,350) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(210,350) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,350) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(735,350) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,350) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,350) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,385) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(35,385) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,385) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(735,385) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,385) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,385) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(35,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(70,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(140,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(210,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(245,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,420) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(35,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(70,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(175,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(770,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(910,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,455) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,490) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(35,490) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(70,490) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(210,490) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(735,490) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,490) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,490) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(70,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(105,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(735,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(770,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,525) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(70,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(105,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(140,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(210,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(735,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,560) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,595) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(35,595) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(245,595) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,595) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,595) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(770,595) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,595) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,595) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(70,630) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(210,630) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,630) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,630) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,630) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(910,630) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,630) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(70,665) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,665) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,665) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,665) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(560,665) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,665) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,665) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(35,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(105,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(140,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(175,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(210,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(245,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(490,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(560,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(735,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(770,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,700) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(910,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,735) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(490,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(770,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,770) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,805) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(280,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(315,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(490,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(735,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(770,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,840) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(455,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(560,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(910,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,875) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(735,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(910,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,910) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(560,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(630,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(665,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(805,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(980,945) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(350,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(385,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(420,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(490,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(525,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(595,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(700,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(840,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(875,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(910,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(945,980) scale(0.35,0.35)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<rect width="100" height="100"/>
+</g></g><g transform="translate(0,0) scale(2.45, 2.45)"><g transform=" translate(100, 0) scale(-1,1) " style="fill: rgb(0,0,0);" class="colorChange">
+<g>
+	<path style="fill:none;" d="M85,66.221V33.75C85,23.411,76.414,15,65.859,15H34.14C23.586,15,15,23.411,15,33.75v51.246
+		l50.855-0.016C76.414,84.98,85,76.564,85,66.221z"/>
+	<path d="M100,66.221V33.75C100,15.141,84.68,0,65.859,0H34.14C15.32,0,0,15.141,0,33.75V100l65.859-0.02
+		C84.68,99.98,100,84.84,100,66.221z M85,66.221c0,10.344-8.586,18.76-19.145,18.76L15,84.996V33.75C15,23.411,23.586,15,34.14,15
+		h31.719C76.414,15,85,23.411,85,33.75V66.221z"/>
+</g>
+</g></g><g transform="translate(770,0) scale(2.45, 2.45)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<g>
+	<path style="fill:none;" d="M85,66.221V33.75C85,23.411,76.414,15,65.859,15H34.14C23.586,15,15,23.411,15,33.75v51.246
+		l50.855-0.016C76.414,84.98,85,76.564,85,66.221z"/>
+	<path d="M100,66.221V33.75C100,15.141,84.68,0,65.859,0H34.14C15.32,0,0,15.141,0,33.75V100l65.859-0.02
+		C84.68,99.98,100,84.84,100,66.221z M85,66.221c0,10.344-8.586,18.76-19.145,18.76L15,84.996V33.75C15,23.411,23.586,15,34.14,15
+		h31.719C76.414,15,85,23.411,85,33.75V66.221z"/>
+</g>
+</g></g><g transform="translate(0,770) scale(2.45, 2.45)"><g transform=" translate(100, 0) scale(-1,1)  translate(0,100) scale(1,-1) " style="fill: rgb(0,0,0);" class="colorChange">
+<g>
+	<path style="fill:none;" d="M85,66.221V33.75C85,23.411,76.414,15,65.859,15H34.14C23.586,15,15,23.411,15,33.75v51.246
+		l50.855-0.016C76.414,84.98,85,76.564,85,66.221z"/>
+	<path d="M100,66.221V33.75C100,15.141,84.68,0,65.859,0H34.14C15.32,0,0,15.141,0,33.75V100l65.859-0.02
+		C84.68,99.98,100,84.84,100,66.221z M85,66.221c0,10.344-8.586,18.76-19.145,18.76L15,84.996V33.75C15,23.411,23.586,15,34.14,15
+		h31.719C76.414,15,85,23.411,85,33.75V66.221z"/>
+</g>
+</g></g><g transform="translate(70,70) scale(1.05, 1.05)"><g transform=" translate(100, 0) scale(-1,1) " style="fill: rgb(0,0,0);" class="colorChange">
+<path d="M100,72.779V27.195C100,12.203,87.604,0,72.37,0H27.63C12.397,0,0,12.203,0,27.195V100l72.37-0.042
+	C87.604,99.958,100,87.771,100,72.779z"/>
+</g></g><g transform="translate(840,70) scale(1.05, 1.05)"><g transform="" style="fill: rgb(0,0,0);" class="colorChange">
+<path d="M100,72.779V27.195C100,12.203,87.604,0,72.37,0H27.63C12.397,0,0,12.203,0,27.195V100l72.37-0.042
+	C87.604,99.958,100,87.771,100,72.779z"/>
+</g></g><g transform="translate(70,840) scale(1.05, 1.05)"><g transform=" translate(100, 0) scale(-1,1)  translate(0,100) scale(1,-1) " style="fill: rgb(0,0,0);" class="colorChange">
+<path d="M100,72.779V27.195C100,12.203,87.604,0,72.37,0H27.63C12.397,0,0,12.203,0,27.195V100l72.37-0.042
+	C87.604,99.958,100,87.771,100,72.779z"/>
+</g></g>
+<g id="surface1" transform="translate(350,350) scale(1,1)">
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 128.046875 11.378906 C 123.953125 19.175781 122.535156 24.648438 122.96875 30.871094 C 123.402344 36.933594 126.394531 43.785156 131.078125 49.414062 C 134.9375 54.023438 141.789062 59.21875 147.5 61.898438 C 149.78125 62.960938 150.375 63.078125 152.734375 62.921875 C 156.710938 62.644531 157.105469 62.292969 157.105469 59.296875 C 157.105469 50.164062 150.886719 35.160156 140.253906 18.703125 C 136.433594 12.757812 131.828125 6.695312 131.117188 6.695312 C 130.765625 6.695312 129.582031 8.464844 128.046875 11.378906 Z M 133.875 26.261719 C 133.875 28.78125 134.152344 30.042969 135.292969 33.273438 C 136.078125 35.4375 138.128906 41.265625 139.820312 46.226562 C 143.679688 57.410156 143.484375 58.707031 139.191406 50.007812 C 135.84375 43.15625 134.503906 39.769531 133.441406 35.714844 C 132.0625 30.320312 131.984375 23.230469 133.324219 23.230469 C 133.757812 23.230469 133.875 23.902344 133.875 26.261719 Z M 140.84375 31.183594 C 143.71875 35.476562 147.5 44.492188 149.429688 51.699219 C 151.277344 58.550781 150.375 59.574219 148.011719 53.3125 C 147.222656 51.1875 144.78125 44.769531 142.617188 39.058594 C 140.449219 33.390625 138.796875 28.742188 138.953125 28.742188 C 139.074219 28.742188 139.9375 29.847656 140.84375 31.183594 Z M 140.84375 31.183594 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 188.015625 7.441406 C 187.582031 7.640625 185.769531 9.804688 184 12.285156 C 178.605469 19.765625 174.511719 27.640625 172.855469 33.585938 C 171.636719 37.957031 171.871094 45.28125 173.484375 52.171875 C 174.3125 55.792969 177.503906 62.371094 179.472656 64.457031 C 180.769531 65.914062 181.242188 66.148438 182.621094 66.148438 C 183.882812 66.148438 184.589844 65.835938 186.125 64.652344 C 193.726562 58.550781 199.277344 48.707031 201.007812 38.195312 C 202.230469 30.476562 201.640625 24.292969 198.6875 14.921875 C 197.070312 9.726562 196.246094 8.425781 194.199219 7.914062 C 191.835938 7.324219 188.882812 7.125 188.015625 7.441406 Z M 192.621094 21.5 C 194.039062 32.089844 189.117188 54.296875 183.960938 60.636719 C 183.289062 61.464844 183.371094 61.03125 184.472656 57.683594 C 186.558594 51.421875 187.503906 45.949219 190.96875 20.316406 C 191.558594 16.144531 191.953125 16.457031 192.621094 21.5 Z M 185.691406 28.035156 C 183.09375 54.140625 182.777344 56.699219 182.265625 56.699219 C 181.320312 56.699219 182.148438 39.375 183.328125 33.46875 C 184 30.359375 185.457031 25.59375 185.769531 25.59375 C 185.851562 25.59375 185.851562 26.695312 185.691406 28.035156 Z M 185.691406 28.035156 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 221.445312 28.625 C 209.988281 41.34375 202.898438 53.945312 201.285156 64.734375 C 200.851562 67.371094 201.246094 68.039062 203.804688 69.101562 C 206.363281 70.167969 207.625 69.890625 212.507812 67.214844 C 219.988281 63.15625 227.351562 57.210938 230.027344 53.039062 C 233.574219 47.566406 233.652344 39.019531 230.265625 31.5 C 228.808594 28.269531 226.367188 24.414062 225.738281 24.414062 C 225.460938 24.414062 223.53125 26.300781 221.445312 28.625 Z M 224.832031 40.082031 C 224.832031 45.003906 219.75 56.425781 215.578125 60.875 L 213.804688 62.804688 L 214.828125 60.441406 C 219.832031 48.785156 224.28125 38.980469 224.515625 38.980469 C 224.671875 38.980469 224.832031 39.492188 224.832031 40.082031 Z M 218.058594 41.304688 C 215.027344 49.140625 207.980469 65.363281 207.625 65.363281 C 206.757812 65.363281 207.035156 62.054688 208.136719 58.984375 C 210.105469 53.589844 216.878906 40.949219 217.824219 40.949219 C 218.019531 40.949219 218.136719 41.109375 218.058594 41.304688 Z M 218.058594 41.304688 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 87.804688 26.261719 C 87.804688 26.894531 88.082031 29.058594 88.398438 31.105469 C 90.050781 41.1875 93.671875 48.390625 100.601562 55.359375 C 106.390625 61.226562 112.574219 65.007812 121.15625 67.882812 L 125.09375 69.222656 L 126.75 66.109375 C 127.613281 64.417969 128.363281 62.644531 128.363281 62.210938 C 128.363281 60.835938 127.339844 59.378906 124.347656 56.464844 C 121.707031 53.863281 108.675781 43.546875 103.554688 39.925781 C 100.878906 38.074219 100.484375 37.601562 113.28125 51.34375 C 118.992188 57.410156 123.480469 62.449219 123.28125 62.527344 C 122.613281 62.765625 117.691406 61.425781 116.039062 60.597656 C 115.132812 60.125 113.714844 59.21875 112.925781 58.550781 C 110.644531 56.699219 105.210938 50.480469 103.792969 48.039062 C 102.097656 45.164062 98.632812 37.089844 98.949219 36.777344 C 99.304688 36.421875 107.53125 40.554688 111.628906 43.117188 C 116.667969 46.304688 120.488281 49.257812 124.9375 53.511719 C 129.1875 57.605469 129.230469 57.566406 127.339844 52.488281 C 124.226562 44.101562 118.203125 37.917969 108.28125 33.035156 C 102.925781 30.398438 89.578125 25.199219 88.121094 25.199219 C 87.964844 25.199219 87.804688 25.671875 87.804688 26.261719 Z M 87.804688 26.261719 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 268.066406 47.839844 C 257.550781 51.777344 250.699219 54.652344 247.039062 56.738281 C 242.984375 59.023438 239.007812 62.765625 237.785156 65.441406 C 237.273438 66.582031 235.738281 69.773438 234.359375 72.566406 C 233.019531 75.324219 232.078125 77.53125 232.3125 77.371094 C 232.507812 77.253906 234.636719 75.519531 237 73.511719 C 242.351562 68.984375 246.605469 65.914062 250.859375 63.472656 C 255.703125 60.675781 264.953125 55.992188 265.152344 56.1875 C 265.308594 56.386719 244.992188 70.796875 238.21875 75.324219 C 233.257812 78.632812 231.523438 80.601562 231.523438 83.042969 C 231.523438 84.65625 234.085938 86.78125 236.722656 87.453125 C 240.582031 88.359375 247.511719 87.058594 253.417969 84.300781 C 262.550781 80.011719 269.128906 73.710938 272.828125 65.675781 C 274.679688 61.738281 275.390625 58.867188 276.214844 52.449219 C 276.886719 47.367188 276.886719 45.203125 276.214844 45.046875 C 276.019531 45.003906 272.316406 46.265625 268.066406 47.839844 Z M 263.96875 63.867188 C 259.953125 71.820312 254.085938 77.882812 246.761719 81.546875 C 242.824219 83.554688 240.855469 83.828125 239.007812 82.609375 L 237.628906 81.742188 L 239.992188 81.46875 C 241.289062 81.347656 243.023438 80.914062 243.808594 80.484375 C 246.800781 78.945312 260.308594 67.09375 263.222656 63.472656 C 264.285156 62.132812 265.191406 61.03125 265.269531 61.03125 C 265.347656 61.03125 264.757812 62.332031 263.96875 63.867188 Z M 263.96875 63.867188 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 162.539062 52.449219 C 161.082031 53.589844 156.910156 64.734375 155.925781 70.085938 C 154.941406 75.363281 156.238281 83.042969 159.113281 88.910156 C 160.808594 92.375 163.5625 95.679688 164.785156 95.679688 C 166.910156 95.679688 171.753906 87.292969 173.09375 81.308594 C 174.117188 76.898438 174 69.023438 172.894531 64.851562 C 171.949219 61.1875 168.722656 53.433594 167.894531 52.722656 C 167.027344 52.015625 163.367188 51.816406 162.539062 52.449219 Z M 167.226562 63.667969 C 168.011719 67.527344 168.09375 79.222656 167.382812 83.671875 C 166.832031 86.980469 165.453125 91.941406 165.140625 91.625 C 165.019531 91.546875 165.140625 90.246094 165.414062 88.75 C 165.691406 87.019531 165.847656 81.230469 165.808594 72.648438 C 165.769531 58.667969 165.964844 57.527344 167.226562 63.667969 Z M 163.640625 77.058594 C 163.917969 82.84375 164.15625 87.84375 164.195312 88.082031 C 164.195312 88.359375 164.035156 88.59375 163.839844 88.59375 C 163.367188 88.59375 162.226562 78 162.226562 73.59375 C 162.226562 69.734375 162.578125 65.992188 162.894531 66.308594 C 163.011719 66.425781 163.328125 71.230469 163.640625 77.058594 Z M 163.640625 77.058594 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 54.140625 61.03125 C 47.957031 61.464844 41.738281 62.210938 41.738281 62.566406 C 41.738281 62.722656 43.078125 64.300781 44.691406 66.148438 C 54.613281 77.332031 66.898438 84.183594 81.308594 86.625 C 85.796875 87.375 87.375 87.492188 93.910156 87.292969 C 101.941406 87.058594 104.226562 86.703125 103.988281 85.796875 C 103.910156 85.484375 103.714844 84.183594 103.554688 82.84375 C 103.203125 80.050781 102.414062 78.316406 100.996094 77.410156 C 98.910156 76.03125 92.53125 74.378906 80.050781 71.898438 C 63.039062 68.550781 61.859375 68.433594 67.726562 70.519531 C 70.207031 71.386719 78.042969 74.105469 85.167969 76.503906 C 92.253906 78.867188 98.042969 80.953125 98.042969 81.113281 C 98.042969 81.742188 91.546875 82.765625 89.144531 82.570312 C 85.71875 82.253906 76.113281 79.027344 71.742188 76.78125 C 66.78125 74.183594 58.628906 68.355469 59.652344 68.15625 C 61.425781 67.84375 75.71875 68.472656 79.539062 69.101562 C 84.851562 69.929688 91.429688 71.464844 95.640625 72.882812 C 97.492188 73.511719 99.066406 74.023438 99.144531 74.023438 C 99.65625 74.023438 97.53125 72.09375 94.894531 70.125 C 89.34375 65.992188 81.980469 62.804688 75.246094 61.582031 C 71.152344 60.875 60.558594 60.558594 54.140625 61.03125 Z M 54.140625 61.03125 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 136.433594 63.394531 C 134.625 66.308594 133.441406 69.101562 132.773438 72.410156 C 131.945312 76.425781 132.417969 79.617188 134.503906 83.828125 C 137.300781 89.5 145.492188 96.351562 149.980469 96.785156 C 152.773438 97.019531 153.5625 96.46875 153.5625 94.183594 C 153.5625 92.097656 152.5 87.886719 151.238281 84.65625 C 148.835938 78.710938 142.300781 67.488281 138.480469 62.84375 L 137.535156 61.660156 Z M 139.230469 74.496094 C 139.269531 75.640625 139.898438 78.082031 140.570312 79.929688 C 143.050781 86.46875 144.820312 92.136719 144.46875 92.136719 C 143.796875 92.136719 139.859375 83.4375 138.992188 80.167969 C 138.246094 77.136719 137.929688 72.84375 138.480469 72.332031 C 138.914062 71.859375 139.113281 72.410156 139.230469 74.496094 Z M 144.113281 78.042969 C 146.59375 82.410156 150.058594 92.648438 149.308594 93.398438 C 149.113281 93.59375 147.460938 89.734375 145.609375 84.851562 C 143.757812 79.96875 142.417969 75.992188 142.578125 75.992188 C 142.773438 75.992188 143.441406 76.9375 144.113281 78.042969 Z M 144.113281 78.042969 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 191.480469 66.859375 C 184.433594 76.113281 179.945312 85.246094 178.605469 93.042969 C 178.054688 96.191406 178.054688 96.3125 178.839844 97.175781 C 179.3125 97.648438 180.296875 98.203125 181.085938 98.4375 C 182.386719 98.792969 182.699219 98.671875 185.769531 96.746094 C 190.023438 94.105469 195.417969 89.382812 197.308594 86.625 C 198.136719 85.445312 199.078125 83.59375 199.394531 82.570312 C 200.222656 80.089844 200.222656 74.773438 199.433594 71.308594 C 198.726562 68.238281 196.125 62.84375 195.261719 62.683594 C 194.945312 62.644531 193.332031 64.417969 191.480469 66.859375 Z M 193.960938 79.066406 C 193.054688 82.492188 190.734375 87.804688 188.921875 90.601562 C 188.09375 91.941406 187.308594 92.925781 187.226562 92.847656 C 187.109375 92.765625 188.683594 88.4375 190.691406 83.238281 C 193.765625 75.246094 194.316406 74.0625 194.433594 75.246094 C 194.511719 76.074219 194.277344 77.765625 193.960938 79.066406 Z M 186.480469 85.445312 C 184.667969 90.484375 182.976562 94.777344 182.738281 95.011719 C 181.875 95.878906 182.304688 92.175781 183.527344 88.710938 C 184.90625 84.695312 189.433594 75.207031 189.667969 75.835938 C 189.75 76.074219 188.332031 80.402344 186.480469 85.445312 Z M 186.480469 85.445312 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 228.964844 67.765625 C 223.019531 69.140625 215.382812 72.527344 211.445312 75.519531 C 205.734375 79.851562 200.300781 87.214844 198.648438 92.925781 C 198.371094 93.832031 198.410156 93.832031 199.867188 92.609375 C 204.316406 88.871094 208.921875 85.285156 212.429688 82.804688 C 217.351562 79.339844 222.113281 76.308594 222.3125 76.464844 C 222.390625 76.546875 221.089844 77.765625 219.398438 79.183594 C 217.742188 80.5625 214.671875 83.199219 212.625 85.050781 C 210.578125 86.902344 207.625 89.460938 206.050781 90.679688 C 204.472656 91.902344 202.546875 93.710938 201.71875 94.695312 C 200.222656 96.46875 196.519531 102.296875 196.480469 102.847656 C 196.480469 103.515625 201.285156 103.125 204.90625 102.179688 C 215.972656 99.382812 224.203125 91.902344 227.707031 81.507812 C 229.636719 75.796875 231.523438 67.292969 230.855469 67.371094 C 230.699219 67.410156 229.832031 67.566406 228.964844 67.765625 Z M 219.359375 85.324219 C 216.445312 90.917969 212.308594 95.089844 206.679688 98.203125 C 202.9375 100.25 202.703125 99.933594 206.011719 97.296875 C 209.277344 94.65625 216.796875 87.019531 219.082031 83.988281 C 219.949219 82.84375 220.734375 81.980469 220.816406 82.058594 C 220.894531 82.175781 220.222656 83.632812 219.359375 85.324219 Z M 219.359375 85.324219 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 103.003906 70.167969 C 103.949219 77.058594 105.683594 82.175781 108.558594 86.546875 C 112.730469 92.765625 118.832031 97.6875 126 100.523438 C 130.605469 102.335938 130.527344 102.335938 131.671875 100.050781 C 133.246094 96.980469 133.085938 96.035156 130.449219 93.238281 C 129.1875 91.902344 125.054688 88.359375 121.273438 85.324219 C 113.164062 78.828125 112.96875 78.671875 114.03125 79.929688 C 115.171875 81.347656 126.195312 93.59375 128.125 95.601562 L 129.742188 97.335938 L 128.164062 97.058594 C 123.914062 96.3125 119.1875 92.609375 115.488281 87.097656 C 114.148438 85.089844 111.039062 78.355469 111.039062 77.53125 C 111.039062 77.015625 117.691406 80.523438 121.039062 82.765625 C 124.425781 85.050781 129.1875 89.066406 131.316406 91.429688 C 133.007812 93.320312 133.125 93.359375 132.851562 92.296875 C 132.300781 90.011719 130.804688 86.664062 129.230469 84.421875 C 126.195312 79.929688 121.828125 76.503906 115.40625 73.511719 C 112.375 72.136719 103.398438 68.511719 102.925781 68.511719 C 102.847656 68.511719 102.847656 69.261719 103.003906 70.167969 Z M 103.003906 70.167969 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 274.246094 90.601562 C 269.089844 91.113281 260.703125 92.847656 259.007812 93.792969 C 257.355469 94.734375 256.527344 96.191406 256.132812 98.871094 C 255.898438 100.5625 255.9375 100.722656 256.804688 100.917969 C 259.597656 101.707031 286.609375 100.5625 293.738281 99.382812 C 294.484375 99.265625 294.996094 99.265625 294.839844 99.460938 C 294.210938 100.050781 277.277344 102.570312 271.058594 103.003906 C 268.617188 103.164062 265.308594 103.082031 262.394531 102.769531 C 255.109375 101.941406 255.464844 101.902344 254.796875 103.832031 C 254.441406 104.738281 254.324219 105.605469 254.441406 105.722656 C 254.914062 106.195312 260.976562 107.101562 267.042969 107.53125 C 277.121094 108.320312 288.460938 107.101562 296.964844 104.304688 C 302.714844 102.414062 310.273438 98.203125 310.273438 96.863281 C 310.273438 95.089844 295.15625 91.269531 285.507812 90.5625 C 279.878906 90.128906 279.167969 90.128906 274.246094 90.601562 Z M 282.042969 96.3125 C 290.507812 97.414062 289.839844 97.570312 277.988281 97.375 C 271.609375 97.257812 264.953125 97.375 263.222656 97.570312 C 261.488281 97.769531 259.992188 97.886719 259.914062 97.808594 C 259.679688 97.609375 261.648438 96.902344 264.796875 96.035156 C 267.984375 95.167969 273.734375 95.25 282.042969 96.3125 Z M 282.042969 96.3125 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 74.929688 90.957031 C 74.417969 91.152344 74.023438 91.46875 74.023438 91.664062 C 74.023438 92.453125 76.464844 95.289062 80.402344 99.105469 C 84.773438 103.320312 89.933594 106.980469 94.695312 109.265625 C 98.359375 111 106.746094 113.792969 108.28125 113.792969 C 109.855469 113.792969 111.707031 112.96875 113.359375 111.550781 L 114.738281 110.367188 L 111.195312 108.28125 C 106.667969 105.5625 94.5 99.34375 90.089844 97.414062 C 88.160156 96.625 86.703125 95.878906 86.742188 95.800781 C 86.941406 95.640625 92.726562 97.730469 98.4375 100.011719 C 104.265625 102.335938 108.753906 104.738281 112.414062 107.492188 C 114.148438 108.792969 115.644531 109.855469 115.761719 109.855469 C 116.390625 109.855469 118.558594 108.164062 118.402344 107.769531 C 118.203125 107.101562 114.1875 103.910156 110.445312 101.390625 C 104.5 97.414062 96.351562 93.792969 89.773438 92.175781 C 83.867188 90.757812 76.898438 90.167969 74.929688 90.957031 Z M 95.679688 103.003906 C 98.398438 104.699219 102.652344 107.140625 105.132812 108.398438 C 107.613281 109.699219 109.699219 110.761719 109.777344 110.839844 C 110.171875 111.195312 104.34375 109.738281 103.003906 109.109375 C 100.878906 108.164062 95.445312 104.460938 91.863281 101.46875 C 89.027344 99.144531 88.160156 98.203125 89.894531 99.304688 C 90.367188 99.617188 92.964844 101.3125 95.679688 103.003906 Z M 95.679688 103.003906 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 249.835938 91.78125 C 236.800781 93.4375 221.328125 101.035156 214.75 108.988281 C 212.585938 111.628906 212.230469 112.414062 213.136719 112.730469 C 213.765625 112.925781 215.144531 112.0625 217.351562 110.054688 C 221.445312 106.351562 225.460938 104.265625 237.589844 99.65625 C 245.34375 96.664062 247.785156 96.113281 241.878906 98.632812 C 231.996094 102.847656 214.871094 112.296875 215.066406 113.398438 C 215.5 115.722656 222.980469 116 229.398438 113.871094 C 234.003906 112.335938 238.691406 109.972656 242.984375 107.019531 C 247.234375 104.148438 254.757812 97.375 257.199219 94.222656 L 259.046875 91.824219 L 257.828125 91.585938 C 256.292969 91.269531 253.339844 91.351562 249.835938 91.78125 Z M 241.960938 101.113281 C 238.769531 103.949219 232.351562 108.4375 229.359375 109.933594 C 226.5625 111.351562 220.5 113.28125 220.5 112.769531 C 220.5 112.691406 222.390625 111.667969 224.753906 110.527344 C 227.074219 109.34375 231.800781 106.707031 235.265625 104.621094 C 240.9375 101.273438 243.0625 100.128906 241.960938 101.113281 Z M 241.960938 101.113281 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 35.4375 93.359375 C 25.789062 94.34375 13.546875 97.886719 5.316406 102.058594 L 3.425781 103.042969 L 7.402344 105.289062 C 12.441406 108.164062 23.390625 113.28125 28.546875 115.171875 C 30.710938 116 34.453125 117.101562 36.816406 117.652344 C 40.714844 118.558594 41.933594 118.675781 48.824219 118.675781 C 56.976562 118.675781 60.796875 118.125 67.171875 116.078125 L 69.890625 115.210938 L 65.953125 114.894531 C 56.1875 114.148438 44.53125 111.863281 36.617188 109.148438 C 31.617188 107.414062 24.804688 104.660156 24.804688 104.34375 C 24.804688 104.1875 25.398438 103.949219 26.105469 103.832031 C 26.773438 103.714844 29.925781 103.082031 33.074219 102.414062 C 41.5 100.683594 45.792969 100.328125 53.511719 100.839844 C 63.234375 101.429688 66.03125 102.257812 70.835938 105.878906 L 73 107.492188 L 71.386719 107.492188 C 70.007812 107.492188 42.484375 105.996094 32.089844 105.367188 L 28.941406 105.171875 L 30.910156 105.722656 C 34.609375 106.824219 61.621094 111.785156 66.148438 112.257812 C 68.628906 112.496094 71.464844 112.574219 72.410156 112.453125 C 74.8125 112.140625 76.9375 110.800781 78.394531 108.714844 C 79.105469 107.730469 80.167969 106.351562 80.796875 105.683594 L 81.9375 104.460938 L 80.128906 103.398438 C 66.386719 95.328125 50.714844 91.824219 35.4375 93.359375 Z M 35.4375 93.359375 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 157.304688 97.925781 C 149.035156 98.671875 137.617188 102.21875 129.9375 106.390625 C 123.324219 109.972656 117.023438 114.9375 114.148438 118.753906 C 112.574219 120.800781 112.535156 120.921875 113.164062 121.867188 C 114.109375 123.324219 119.304688 127.652344 123.402344 130.371094 C 126.867188 132.695312 141.710938 140.253906 143.757812 140.6875 C 148.167969 141.75 152.34375 148.128906 154.546875 157.222656 C 157.34375 168.644531 156.988281 176.398438 152.183594 211.445312 C 150.414062 224.359375 149.703125 227.546875 147.972656 230.109375 C 145.492188 233.730469 143.640625 234.320312 133.285156 234.714844 C 127.0625 234.949219 123.714844 235.265625 119.699219 236.015625 C 116.785156 236.605469 111.984375 237.234375 109.070312 237.429688 C 97.375 238.296875 92.453125 239.359375 86.664062 242.273438 C 81.46875 244.875 80.128906 244.914062 73.433594 242.863281 C 64.21875 239.992188 52.839844 238.886719 46.148438 240.148438 C 43.15625 240.699219 38.429688 242.15625 38.707031 242.390625 C 38.785156 242.472656 40.082031 242.390625 41.578125 242.15625 C 45.203125 241.644531 56.976562 241.644531 61.660156 242.195312 C 68.355469 242.945312 74.339844 244.832031 75.246094 246.566406 C 75.796875 247.589844 74.773438 249.125 73.039062 249.875 C 72.292969 250.148438 69.0625 250.9375 65.835938 251.566406 C 59.730469 252.789062 56.1875 253.851562 54.652344 254.914062 C 53.785156 255.542969 53.785156 255.542969 55.125 255.542969 C 56.660156 255.542969 65.675781 254.203125 68.710938 253.535156 C 73.632812 252.472656 77.804688 250.9375 83.277344 248.21875 C 91.035156 244.402344 94.894531 243.257812 100.917969 243.023438 C 103.714844 242.945312 105.761719 243.023438 105.996094 243.257812 C 106.507812 243.769531 104.265625 245.898438 99.933594 248.929688 C 97.964844 250.308594 94.578125 252.75 92.375 254.363281 C 88.671875 257.117188 88.277344 257.550781 86.941406 260.269531 C 86.113281 261.882812 84.890625 265.269531 84.261719 267.75 C 83.554688 270.386719 82.53125 273.183594 81.78125 274.40625 C 79.105469 278.855469 73.316406 282.949219 67.332031 284.523438 C 63.867188 285.429688 57.761719 285.429688 53.863281 284.523438 C 49.886719 283.617188 49.0625 283.933594 52.566406 285.035156 C 59.179688 287.121094 70.875 287.714844 73.945312 286.097656 C 76.113281 284.996094 79.5 281.136719 84.773438 273.933594 C 89.773438 267 91.980469 264.601562 93.238281 264.601562 C 94.460938 264.601562 96.824219 266.882812 97.097656 268.378906 C 97.453125 270.347656 95.601562 273.890625 92.175781 277.710938 C 88.4375 281.925781 87.84375 284.089844 89.5 287.832031 L 90.089844 289.210938 L 90.128906 286.257812 C 90.167969 282.042969 91.191406 280.152344 94.183594 278.578125 C 98.59375 276.214844 100.328125 273.617188 100.683594 268.8125 C 100.878906 266.292969 100.800781 265.742188 99.894531 264.007812 C 98.203125 260.664062 98.398438 259.046875 100.601562 257.316406 C 101.390625 256.765625 104.621094 253.652344 107.808594 250.464844 C 115.644531 242.628906 119.660156 240.070312 122.96875 240.816406 C 126.078125 241.449219 131.117188 244.753906 131.117188 246.132812 C 131.117188 246.921875 127.21875 250.621094 125.015625 251.960938 C 122.21875 253.652344 116.234375 255.703125 110.527344 256.960938 C 105.878906 257.945312 105.878906 257.945312 113.597656 257.316406 C 116.667969 257.039062 118.164062 257.550781 116.746094 258.378906 C 116.3125 258.613281 114.976562 259.796875 113.792969 261.015625 C 112.101562 262.710938 111.273438 264.046875 110.09375 266.765625 C 108.003906 271.726562 105.957031 275.074219 103.554688 277.515625 C 102.414062 278.617188 101.625 279.5625 101.785156 279.5625 C 101.941406 279.5625 103.003906 279.011719 104.148438 278.382812 C 107.21875 276.609375 110.171875 273.460938 112.613281 269.285156 C 115.328125 264.640625 118.441406 260.703125 121.707031 257.789062 C 125.644531 254.246094 127.101562 254.246094 126.195312 257.828125 C 125.765625 259.441406 125.722656 260.386719 126.039062 261.882812 C 126.277344 262.945312 126.589844 263.890625 126.789062 264.007812 C 126.984375 264.128906 126.984375 263.65625 126.789062 262.984375 C 126.316406 261.371094 126.667969 259.796875 128.007812 257.039062 C 128.636719 255.78125 129.148438 254.363281 129.148438 253.851562 C 129.148438 252.039062 131.710938 250.660156 136.160156 250.03125 C 139.78125 249.519531 141.316406 249.992188 143.246094 252.234375 C 146.199219 255.542969 145.726562 257.316406 141.433594 258.929688 C 133.324219 261.960938 129.464844 265.074219 117.179688 278.5 C 113.636719 282.359375 109.699219 286.058594 107.101562 287.949219 C 106.546875 288.34375 106.390625 288.539062 106.707031 288.382812 C 107.019531 288.226562 108.988281 286.925781 111.039062 285.46875 C 116.15625 281.847656 117.179688 281.335938 119.464844 281.492188 C 120.09375 281.53125 120.171875 281.765625 120.015625 283.222656 C 119.859375 284.445312 118.636719 286.964844 115.800781 291.925781 C 113.636719 295.824219 111.824219 299.054688 111.824219 299.210938 C 111.824219 299.328125 112.730469 298.542969 113.832031 297.476562 C 118.085938 293.304688 121.039062 287.714844 122.890625 280.390625 C 123.558594 277.871094 124.503906 275.152344 125.015625 274.363281 C 127.023438 271.332031 133.246094 267.394531 136.199219 267.277344 C 138.480469 267.199219 139.152344 267.90625 138.875 270.191406 C 138.601562 272.515625 136.90625 276.175781 132.0625 284.917969 C 129.976562 288.699219 128.363281 291.886719 128.441406 292.003906 C 128.558594 292.082031 129.9375 290.3125 131.550781 287.988281 C 134.425781 283.816406 135.84375 282.554688 136.671875 283.382812 C 136.90625 283.617188 137.261719 285.390625 137.457031 287.28125 C 137.890625 291.453125 138.601562 292.636719 138.601562 289.210938 C 138.640625 284.089844 141 276.453125 145.175781 268.105469 C 148.050781 262.316406 150.804688 258.535156 151.515625 259.285156 C 152.382812 260.230469 153.285156 266.332031 153.050781 269.914062 C 152.8125 273.300781 151.121094 281.019531 149.859375 284.640625 C 149.507812 285.585938 149.230469 286.414062 149.230469 286.53125 C 149.230469 286.808594 153.839844 281.335938 154.269531 280.46875 C 155.058594 279.050781 157.734375 262.160156 158.089844 256.410156 C 158.207031 254.597656 158.5625 252.511719 158.839844 251.804688 C 159.585938 250.03125 162.539062 246.882812 163.445312 246.882812 C 164.863281 246.882812 165.019531 248.140625 164.785156 256.054688 C 164.546875 263.222656 164.585938 264.046875 165.730469 271.492188 C 168.328125 288.65625 167.816406 292.753906 162.226562 298.34375 C 159.625 300.984375 159.546875 301.335938 160.964844 303.582031 C 161.28125 304.09375 161.714844 305.078125 161.871094 305.746094 C 162.144531 306.929688 162.144531 306.929688 162.1875 305.863281 C 162.226562 305.273438 162.027344 303.855469 161.792969 302.714844 L 161.320312 300.667969 L 162.816406 299.367188 C 164.234375 298.148438 166.28125 297.28125 167.816406 297.28125 C 168.171875 297.28125 170.019531 298.460938 171.871094 299.878906 C 173.761719 301.296875 177.070312 303.503906 179.273438 304.800781 C 183.25 307.125 183.289062 307.125 181.320312 305.472656 C 177.382812 302.164062 170.453125 295.117188 170.21875 294.210938 C 169.980469 293.1875 171.476562 274.011719 172.109375 270.191406 C 172.34375 268.851562 172.699219 267.75 172.855469 267.75 C 173.054688 267.75 173.328125 268.578125 173.445312 269.640625 C 174.273438 275.46875 174.902344 277.476562 177.699219 283.460938 C 178.40625 284.957031 183.882812 292.320312 183.882812 291.769531 C 183.882812 291.53125 182.898438 288.699219 181.675781 285.546875 C 176.4375 271.964844 176.007812 268.378906 179.039062 264.324219 C 179.550781 263.617188 180.335938 263.023438 180.769531 263.023438 C 182.660156 263.023438 188.210938 269.71875 190.457031 274.71875 C 192.9375 280.269531 193.726562 287.082031 192.347656 290.980469 C 191.046875 294.605469 192.582031 292.714844 194.394531 288.382812 C 195.0625 286.886719 195.851562 285.625 196.167969 285.546875 C 196.953125 285.390625 198.84375 289.089844 198.84375 290.785156 C 198.84375 292.4375 197.742188 296.140625 196.953125 296.964844 C 196.640625 297.359375 196.558594 297.675781 196.757812 297.675781 C 197.703125 297.675781 199.59375 294.917969 200.023438 292.832031 C 201.089844 288.144531 199.277344 281.648438 194.90625 274.246094 C 192.070312 269.484375 192.03125 268.695312 194.628906 269.089844 C 198.449219 269.679688 204.082031 273.617188 205.773438 276.886719 C 206.128906 277.554688 207.269531 280.664062 208.332031 283.855469 C 209.4375 287.003906 210.734375 290.234375 211.246094 290.980469 C 212.703125 293.066406 214.554688 295.078125 214.789062 294.839844 C 214.910156 294.722656 214.042969 292.554688 212.820312 289.996094 C 211.640625 287.4375 210.65625 285.234375 210.65625 285.035156 C 210.65625 284.011719 212.664062 284.445312 218.335938 286.6875 C 221.71875 287.988281 224.554688 289.011719 224.632812 288.933594 C 224.714844 288.894531 223.570312 287.949219 222.152344 286.847656 C 217.230469 283.222656 215.34375 281.453125 213.136719 278.421875 C 208.175781 271.6875 200.65625 265.503906 191.757812 260.859375 C 186.28125 257.984375 185.769531 257.671875 185.140625 256.449219 C 184.394531 255.109375 184.589844 253.734375 185.613281 252.511719 C 186.519531 251.488281 186.753906 251.410156 189.472656 251.449219 C 191.480469 251.449219 193.054688 251.722656 194.628906 252.355469 C 197.269531 253.417969 197.9375 254.324219 197.230469 255.976562 C 196.835938 257 196.875 257.238281 197.625 258.0625 C 198.09375 258.574219 199.472656 259.324219 200.695312 259.71875 C 203.488281 260.664062 205.5 262.394531 205.890625 264.207031 L 206.207031 265.585938 L 206.523438 264.441406 C 207.035156 262.550781 206.324219 261.371094 203.921875 260.070312 C 202.703125 259.402344 201.402344 258.65625 201.046875 258.339844 C 200.144531 257.550781 200.261719 256.449219 201.402344 255.703125 C 202.269531 255.109375 202.546875 255.109375 204.160156 255.660156 C 206.601562 256.527344 209.949219 258.8125 211.917969 261.015625 C 212.859375 262.039062 214.75 264.914062 216.167969 267.394531 C 220.265625 274.5625 219.792969 274.207031 230.738281 277.476562 C 232.46875 277.988281 227.785156 275.507812 225.738281 274.796875 C 222.746094 273.8125 221.128906 272.082031 219.042969 267.789062 C 217.980469 265.585938 217.585938 264.207031 217.429688 262.121094 C 217.230469 259.363281 217.230469 259.363281 218.175781 259.597656 C 220.539062 260.109375 225.777344 261.054688 229.476562 261.609375 C 231.722656 261.960938 234.597656 262.632812 235.894531 263.183594 C 237.15625 263.695312 238.21875 264.046875 238.21875 263.96875 C 238.21875 263.417969 233.296875 261.566406 228.414062 260.269531 C 213.765625 256.449219 193.726562 247.394531 193.726562 244.597656 C 193.726562 243.847656 195.8125 242.15625 197.230469 241.761719 C 199.160156 241.210938 200.578125 241.25 204.316406 241.960938 C 212.429688 243.496094 221.011719 247.355469 236.054688 256.214844 C 242.351562 259.914062 249.675781 264.046875 252.394531 265.386719 C 258.65625 268.539062 261.332031 270.191406 262.945312 272.003906 C 263.695312 272.828125 264.089844 273.105469 263.851562 272.59375 C 263.617188 272.121094 263.417969 271.332031 263.417969 270.78125 C 263.417969 269.601562 262.355469 268.65625 258.929688 266.765625 C 255.820312 265.074219 254.757812 264.128906 254.757812 263.0625 C 254.757812 262.199219 256.488281 261.449219 258.65625 261.410156 C 259.441406 261.410156 260.78125 261.175781 261.648438 260.898438 C 263.023438 260.464844 262.671875 260.425781 258.496094 260.582031 C 251.804688 260.78125 249.242188 260.191406 241.761719 256.488281 C 230.382812 250.9375 224.4375 247.234375 224.4375 245.738281 C 224.4375 245.34375 224.871094 244.558594 225.421875 243.96875 C 226.25 243.0625 226.640625 242.945312 229.042969 242.945312 C 235.542969 242.945312 244.125 244.914062 249.835938 247.667969 C 252 248.730469 256.09375 250.226562 258.890625 251.054688 C 261.726562 251.84375 264.914062 252.984375 266.015625 253.613281 C 268.617188 255.03125 274.445312 256.6875 274.445312 256.015625 C 274.445312 255.859375 273.144531 255.386719 271.609375 255.03125 C 269.601562 254.519531 267.90625 253.773438 265.976562 252.472656 C 264.128906 251.25 261.6875 250.109375 258.535156 249.046875 C 255.9375 248.179688 253.773438 247.273438 253.691406 247 C 253.378906 246.09375 256.292969 244.402344 258.457031 244.203125 C 261.214844 243.96875 263.695312 244.714844 271.371094 248.101562 C 277.003906 250.582031 283.34375 252.667969 283.816406 252.234375 C 283.894531 252.117188 283.183594 251.84375 282.28125 251.605469 C 278.617188 250.699219 274.875 249.125 270.113281 246.488281 C 260.625 241.25 258.261719 240.582031 252.628906 241.605469 C 249.402344 242.195312 248.8125 242.195312 245.34375 241.644531 C 243.257812 241.289062 237.511719 240.621094 232.507812 240.1875 C 219.320312 238.96875 217.703125 238.730469 210.261719 237.234375 C 199.238281 235.03125 196.640625 234.636719 189.984375 234.320312 C 184.945312 234.085938 183.328125 233.847656 181.914062 233.21875 C 178.449219 231.683594 176.714844 229.003906 174.3125 221.484375 C 171.320312 212.113281 170.730469 206.050781 170.691406 183.683594 L 170.691406 167.148438 L 171.792969 162.5 C 172.972656 157.578125 175.335938 150.375 176.910156 146.789062 C 178.171875 144.035156 179.234375 143.128906 182.542969 141.984375 C 185.890625 140.84375 196.796875 135.726562 200.8125 133.480469 C 206.050781 130.488281 209.90625 127.652344 215.773438 122.535156 L 217.507812 121 L 216.207031 119.34375 C 212.074219 114.148438 200.417969 106.351562 191.519531 102.769531 C 186.324219 100.722656 179.667969 98.988281 174.117188 98.242188 C 170.101562 97.730469 161.4375 97.53125 157.304688 97.925781 Z M 148.796875 102.53125 C 142.066406 107.0625 138.046875 115.132812 138.992188 122.140625 C 139.625 126.550781 141.472656 130.644531 144.308594 133.796875 L 146.121094 135.84375 L 144.625 135.214844 C 134.9375 131.199219 124.898438 123.046875 125.84375 120.015625 C 125.960938 119.503906 126.867188 118.046875 127.773438 116.746094 C 132.023438 110.800781 140.015625 104.933594 148.246094 101.746094 C 151.632812 100.445312 151.710938 100.5625 148.796875 102.53125 Z M 184.945312 103.753906 C 195.8125 108.832031 205.222656 118.203125 203.253906 121.90625 C 202.503906 123.28125 198.175781 127.261719 194.671875 129.78125 C 191.597656 131.945312 183.328125 136.632812 182.503906 136.632812 C 182.34375 136.632812 183.25 135.527344 184.511719 134.152344 C 190.0625 128.246094 191.835938 121.039062 189.472656 114.1875 C 187.9375 109.777344 186.636719 107.847656 186.636719 109.972656 C 186.636719 111.46875 184.984375 112.691406 182.738281 112.925781 C 180.890625 113.085938 180.652344 113.007812 179.351562 111.707031 C 178.527344 110.878906 177.976562 109.933594 177.976562 109.34375 C 177.976562 107.140625 181.007812 105.171875 183.605469 105.722656 L 184.867188 105.996094 L 184.078125 105.171875 C 183.644531 104.660156 182.464844 103.753906 181.441406 103.082031 C 178.09375 100.917969 179.390625 101.15625 184.945312 103.753906 Z M 172.5 108.164062 C 175.769531 109.699219 177.894531 111.589844 179.351562 114.265625 C 180.257812 115.960938 180.535156 116.945312 180.652344 119.621094 C 180.808594 122.652344 180.730469 123.046875 179.589844 125.371094 C 176.792969 131.078125 170.730469 134.230469 163.40625 133.757812 C 149.980469 132.96875 143.679688 119.777344 152.695312 111.351562 C 156.476562 107.808594 159.664062 106.667969 165.570312 106.824219 C 169.507812 106.902344 170.140625 107.019531 172.5 108.164062 Z M 172.5 108.164062 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 161.949219 111.039062 C 157.027344 112.023438 153.796875 115.683594 153.757812 120.289062 C 153.71875 130.214844 169.863281 133.125 174.746094 124.03125 C 175.96875 121.667969 175.847656 117.890625 174.46875 115.644531 L 173.527344 114.109375 L 172.972656 115.289062 C 171.476562 118.359375 166.164062 117.652344 166.164062 114.382812 C 166.164062 113.558594 166.515625 112.808594 167.1875 112.179688 L 168.210938 111.234375 L 167.066406 111 C 165.570312 110.644531 163.917969 110.683594 161.949219 111.039062 Z M 161.949219 111.039062 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 85.050781 111.273438 C 82.097656 111.628906 75.363281 112.730469 74.890625 112.96875 C 74.300781 113.28125 81.152344 119.1875 85.796875 122.417969 C 90.167969 125.410156 92.175781 126.039062 98.4375 126.394531 C 101.351562 126.511719 103.792969 126.628906 103.832031 126.589844 C 103.910156 126.550781 102.21875 125.84375 100.089844 125.015625 C 98.003906 124.226562 95.011719 122.851562 93.4375 122.023438 C 90.050781 120.25 84.183594 116.511719 84.378906 116.3125 C 84.460938 116.195312 89.105469 118.359375 94.734375 121.078125 C 105.839844 126.472656 107.414062 126.90625 109.070312 125.132812 C 111.429688 122.574219 107.769531 117.652344 100.839844 114.1875 C 96.625 112.101562 89.617188 110.800781 85.050781 111.273438 Z M 93.554688 115.761719 C 99.617188 116.824219 105.996094 120.054688 106.234375 122.140625 C 106.390625 123.558594 106.15625 123.519531 104.816406 122.0625 C 103.675781 120.800781 95.996094 117.574219 90.757812 116.15625 C 88.199219 115.449219 88.121094 115.40625 89.617188 115.40625 C 90.484375 115.367188 92.253906 115.566406 93.554688 115.761719 Z M 93.554688 115.761719 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 238.296875 114.226562 C 230.1875 115.015625 222.746094 118.164062 216.757812 123.441406 L 215.183594 124.820312 L 216.957031 126.394531 C 219.121094 128.246094 220.304688 128.558594 222.980469 127.96875 C 225.105469 127.457031 242.628906 120.449219 242.390625 120.171875 C 242.3125 120.09375 237.46875 121.3125 231.644531 122.8125 C 225.816406 124.347656 220.933594 125.605469 220.734375 125.605469 C 220.027344 125.605469 222.3125 123.164062 223.925781 122.21875 C 227.785156 119.9375 236.957031 118.242188 242.589844 118.753906 L 245.34375 119.03125 L 243.257812 120.527344 C 239.792969 123.007812 233.019531 126.316406 228.097656 127.929688 L 223.453125 129.464844 L 225.382812 129.742188 C 226.40625 129.898438 228.769531 129.9375 230.539062 129.78125 C 236.722656 129.269531 241.878906 127.300781 247.472656 123.324219 C 250.738281 121 256.449219 116.15625 256.214844 115.921875 C 255.820312 115.527344 248.023438 114.265625 244.914062 114.109375 C 243.0625 113.992188 240.109375 114.03125 238.296875 114.226562 Z M 238.296875 114.226562 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 72.648438 124.265625 C 68.355469 124.738281 63.828125 125.722656 61.109375 126.789062 C 54.574219 129.308594 48.039062 135.960938 44.769531 143.363281 C 43.746094 145.726562 42.683594 149.507812 42.957031 149.78125 C 43.273438 150.097656 56.738281 146.59375 61.859375 144.898438 C 67.488281 143.011719 75.167969 139.664062 80.207031 136.90625 C 84.5 134.542969 90.40625 130.214844 90.757812 129.1875 C 91.035156 128.246094 90.167969 126.039062 89.066406 125.09375 C 88.398438 124.464844 87.375 124.347656 81.269531 124.226562 C 77.371094 124.148438 73.511719 124.1875 72.648438 124.265625 Z M 78.554688 127.140625 C 78.316406 127.339844 73.472656 129.9375 67.726562 132.890625 C 61.976562 135.882812 56.699219 138.640625 55.953125 139.074219 C 51.855469 141.394531 56.699219 136.984375 61.308594 134.230469 C 65.558594 131.671875 70.640625 129.269531 74.8125 127.929688 C 78.433594 126.707031 79.105469 126.589844 78.554688 127.140625 Z M 83.75 129.742188 C 81.703125 131.628906 71.664062 136.867188 65.363281 139.386719 C 59.890625 141.59375 59.96875 141.554688 60.441406 141.042969 C 61.1875 140.214844 84.851562 127.652344 85.207031 127.890625 C 85.40625 128.007812 84.773438 128.835938 83.75 129.742188 Z M 83.75 129.742188 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 251.015625 126.394531 C 245.34375 126.984375 240.582031 128.324219 240.582031 129.308594 C 240.582031 130.214844 242.707031 130.410156 247.273438 129.976562 C 251.804688 129.503906 257.117188 129.859375 262.238281 130.921875 C 267.160156 131.945312 283.972656 136.238281 284.640625 136.632812 C 285.546875 137.183594 285.074219 137.105469 281.214844 136.238281 C 268.417969 133.402344 241.960938 130.214844 241.210938 131.472656 C 240.660156 132.378906 241.921875 135.09375 243.613281 136.671875 C 248.851562 141.515625 260.859375 144.585938 274.445312 144.546875 C 285.113281 144.546875 301.613281 142.378906 301.613281 140.960938 C 301.613281 140.804688 300.46875 139.703125 299.054688 138.601562 C 292.082031 133.046875 282.238281 129.1875 270.074219 127.179688 C 264.679688 126.316406 255.425781 125.921875 251.015625 126.394531 Z M 252.550781 135.449219 C 256.921875 136.160156 264.875 136.984375 273.773438 137.65625 C 275.902344 137.8125 277.042969 138.046875 276.726562 138.246094 C 275.980469 138.71875 261.648438 138.679688 258.023438 138.167969 C 254.675781 137.734375 248.101562 135.6875 247 134.78125 C 246.328125 134.230469 246.328125 134.230469 247.039062 134.425781 C 247.472656 134.582031 249.953125 135.015625 252.550781 135.449219 Z M 252.550781 135.449219 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 109.855469 131.15625 C 102.769531 131.867188 95.328125 134.464844 89.734375 138.207031 C 86.308594 140.53125 81.269531 145.648438 78.789062 149.347656 C 75.835938 153.757812 75.796875 153.5625 79.183594 153.5625 C 83.75 153.5625 91.152344 152.8125 95.484375 151.949219 C 100.171875 151.003906 104.226562 149.390625 107.375 147.183594 C 109.660156 145.609375 114.582031 141.042969 114.582031 140.488281 C 114.582031 140.371094 113.125 140.882812 111.351562 141.710938 C 105.25 144.507812 95.957031 147.105469 89.382812 147.8125 L 87.214844 148.050781 L 90.757812 144.664062 C 97.886719 137.851562 107.257812 133.597656 112.023438 134.976562 C 113.085938 135.292969 112.414062 135.6875 102.097656 140.960938 C 95.996094 144.113281 91.074219 146.710938 91.113281 146.789062 C 91.351562 147.027344 110.210938 140.410156 112.414062 139.308594 C 116.234375 137.378906 116.550781 136.984375 116.550781 133.597656 L 116.550781 130.726562 L 114.894531 130.765625 C 113.953125 130.804688 111.707031 130.960938 109.855469 131.15625 Z M 109.855469 131.15625 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 203.765625 133.125 C 203.332031 133.402344 202.9375 133.640625 202.898438 133.640625 C 202.859375 133.679688 202.503906 134.386719 202.191406 135.214844 L 201.5625 136.75 L 203.648438 138.679688 C 207.9375 142.734375 213.925781 146.671875 217.824219 148.050781 C 223.019531 149.859375 229.042969 149.859375 235.894531 148.011719 C 239.164062 147.144531 245.542969 144.152344 245.464844 143.523438 C 245.386719 142.96875 236.605469 139.230469 231.09375 137.417969 C 226.367188 135.882812 219.515625 134.191406 214.988281 133.519531 C 210.378906 132.851562 204.632812 132.65625 203.765625 133.125 Z M 215.578125 136.90625 C 221.289062 137.851562 231.210938 140.449219 229.515625 140.570312 C 228.886719 140.609375 206.835938 136.984375 206.324219 136.75 C 205.417969 136.355469 208.175781 135.921875 210.261719 136.121094 C 211.246094 136.199219 213.648438 136.550781 215.578125 136.90625 Z M 220.972656 142.027344 C 226.996094 143.050781 231.761719 144.074219 231.644531 144.269531 C 231.328125 144.78125 224.359375 144.230469 219.632812 143.324219 C 214.710938 142.378906 207.9375 140.214844 209.789062 140.175781 C 209.949219 140.175781 214.988281 141 220.972656 142.027344 Z M 220.972656 142.027344 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 126.984375 141 C 122.257812 141.710938 119.503906 143.167969 116.117188 146.75 C 113.753906 149.191406 111.667969 152.855469 111.234375 155.253906 L 110.957031 156.671875 L 116 155.375 C 125.054688 153.011719 133.207031 149.546875 138.128906 145.921875 C 140.726562 143.996094 141.121094 143.050781 140.015625 141.515625 C 139.503906 140.84375 138.914062 140.765625 134.386719 140.6875 C 131.628906 140.648438 128.285156 140.804688 126.984375 141 Z M 132.890625 142.5 C 132.140625 143.207031 118.519531 150.097656 118.519531 149.742188 C 118.519531 148.835938 125.921875 144.664062 130.332031 143.089844 C 133.207031 142.027344 133.402344 141.984375 132.890625 142.5 Z M 136.984375 143.5625 C 136.121094 144.625 130.765625 147.578125 126.277344 149.46875 C 123.914062 150.453125 121.945312 151.199219 121.867188 151.121094 C 121.667969 150.925781 136.355469 142.96875 136.984375 142.929688 C 137.417969 142.929688 137.417969 143.050781 136.984375 143.5625 Z M 136.984375 143.5625 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 189.117188 142.8125 C 189.472656 146.042969 191.402344 149.742188 194.277344 152.578125 C 197.425781 155.648438 200.8125 158.25 202.664062 158.917969 C 204.238281 159.46875 209.476562 159.664062 209.476562 159.152344 C 209.476562 158.996094 209.042969 158.128906 208.53125 157.222656 C 208.019531 156.359375 207.308594 154.703125 206.914062 153.601562 C 206.363281 151.949219 205.5 150.804688 202.269531 147.539062 C 198.882812 144.152344 197.898438 143.402344 196.085938 142.773438 C 194.90625 142.378906 193.449219 141.710938 192.859375 141.316406 C 192.308594 140.882812 191.164062 140.570312 190.378906 140.570312 L 188.882812 140.570312 Z M 195.851562 147.261719 C 197.425781 149.113281 198.410156 150.570312 198.214844 150.84375 C 198.054688 151.121094 198.09375 151.199219 198.332031 151.082031 C 198.566406 150.925781 199.433594 151.671875 200.261719 152.695312 C 202.585938 155.609375 202.664062 155.925781 200.378906 153.5625 C 198.292969 151.359375 198.609375 152.539062 200.773438 154.902344 C 202.464844 156.75 200.496094 155.492188 198.566406 153.484375 C 197.230469 152.105469 192.542969 144.9375 192.542969 144.308594 C 192.542969 143.640625 193.566406 144.507812 195.851562 147.261719 Z M 195.851562 147.261719 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 226.011719 153.089844 C 225.226562 153.367188 225.738281 153.640625 229.359375 154.902344 C 233.769531 156.476562 245.070312 161.4375 244.792969 161.714844 C 244.714844 161.792969 240.464844 160.414062 235.34375 158.679688 C 226.5625 155.6875 222.746094 154.78125 218.808594 154.742188 L 217.3125 154.742188 L 218.019531 155.964844 C 219.28125 158.089844 223.925781 162.144531 226.800781 163.601562 C 231.09375 165.769531 235.582031 166.675781 240.582031 166.4375 C 244.875 166.242188 253.101562 164.785156 253.734375 164.15625 C 254.203125 163.722656 251.171875 160.847656 247.945312 158.601562 C 244.832031 156.476562 241.367188 154.902344 237.667969 153.957031 C 234.320312 153.089844 227.625 152.617188 226.011719 153.089844 Z M 235.660156 161.632812 L 240.382812 162.617188 L 236.054688 162.460938 C 232.667969 162.34375 231.132812 162.066406 228.925781 161.28125 C 226.171875 160.296875 222.664062 158.484375 222.3125 157.972656 C 222.234375 157.816406 224.121094 158.328125 226.523438 159.152344 C 228.964844 159.941406 233.0625 161.082031 235.660156 161.632812 Z M 235.660156 161.632812 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 87.214844 155.964844 C 80.207031 156.988281 74.65625 160.53125 70.71875 166.515625 C 69.0625 169.035156 67.410156 172.699219 67.804688 173.054688 C 68.078125 173.367188 80.363281 170.21875 84.65625 168.722656 C 89.578125 167.027344 99.027344 162.421875 101.707031 160.453125 C 103.398438 159.191406 103.59375 158.878906 103.359375 157.972656 C 102.847656 155.765625 102.097656 155.53125 95.523438 155.570312 C 92.253906 155.609375 88.515625 155.765625 87.214844 155.964844 Z M 91.941406 158.839844 C 90.445312 159.585938 86.390625 161.515625 83.003906 163.128906 C 79.578125 164.785156 76.78125 165.964844 76.78125 165.808594 C 76.78125 164.863281 84.222656 160.769531 89.578125 158.839844 C 94.144531 157.183594 95.484375 157.183594 91.941406 158.839844 Z M 98.988281 158.71875 C 97.570312 160.296875 90.957031 163.5625 83.949219 166.125 C 82.175781 166.792969 80.71875 167.226562 80.71875 167.109375 C 80.71875 166.871094 98.871094 157.894531 99.382812 157.894531 C 99.578125 157.894531 99.421875 158.25 98.988281 158.71875 Z M 98.988281 158.71875 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 106.507812 171.515625 C 103.042969 172.460938 99.539062 173.445312 98.753906 173.683594 C 97.257812 174.078125 96.664062 175.296875 97.769531 175.691406 C 98.160156 175.847656 103.398438 174.550781 113.714844 171.714844 C 114.9375 171.359375 115.367188 171.046875 115.367188 170.492188 C 115.367188 169.3125 113.792969 169.507812 106.507812 171.515625 Z M 106.507812 171.515625 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 208.019531 170.730469 C 207.898438 171.046875 207.9375 171.476562 208.136719 171.636719 C 208.726562 172.148438 225.226562 176.4375 225.617188 176.203125 C 226.328125 175.769531 226.050781 174.824219 225.144531 174.429688 C 223.886719 173.878906 209.671875 170.101562 208.921875 170.101562 C 208.570312 170.101562 208.175781 170.375 208.019531 170.730469 Z M 208.019531 170.730469 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 107.453125 182.304688 C 100.445312 186.441406 94.460938 190.0625 94.144531 190.378906 C 93.515625 191.007812 93.871094 191.757812 94.855469 191.757812 C 95.640625 191.757812 120.882812 177.03125 121.355469 176.28125 C 121.628906 175.847656 121.039062 174.824219 120.527344 174.824219 C 120.371094 174.824219 114.503906 178.210938 107.453125 182.304688 Z M 107.453125 182.304688 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 201.757812 176.046875 C 201.640625 176.28125 201.757812 176.714844 202.03125 176.992188 C 202.625 177.542969 227.074219 191.992188 228.058594 192.347656 C 228.375 192.464844 228.886719 192.308594 229.164062 191.953125 C 229.59375 191.441406 229.59375 191.246094 229.125 190.8125 C 227.902344 189.667969 203.53125 175.613281 202.820312 175.613281 C 202.386719 175.613281 201.914062 175.808594 201.757812 176.046875 Z M 201.757812 176.046875 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 128.519531 179.472656 C 128.324219 179.628906 124.621094 184.589844 120.328125 190.496094 C 113.359375 200.144531 112.574219 201.363281 113.125 201.875 C 113.519531 202.269531 113.910156 202.347656 114.304688 202.152344 C 114.9375 201.796875 129.820312 181.441406 130.214844 180.417969 C 130.332031 180.101562 130.214844 179.707031 129.898438 179.511719 C 129.230469 179.078125 129.070312 179.078125 128.519531 179.472656 Z M 128.519531 179.472656 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 193.132812 180.296875 C 193.015625 180.535156 193.015625 180.96875 193.171875 181.203125 C 194.316406 183.210938 208.570312 202.503906 209.003906 202.664062 C 209.277344 202.78125 209.789062 202.625 210.105469 202.308594 C 210.617188 201.796875 209.75 200.417969 202.859375 190.929688 C 195.300781 180.496094 193.960938 179 193.132812 180.296875 Z M 193.132812 180.296875 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 138.324219 183.171875 C 137.96875 183.644531 135.054688 196.835938 135.054688 197.898438 C 135.054688 198.609375 136.316406 198.921875 136.867188 198.371094 C 137.496094 197.703125 140.371094 184.15625 140.058594 183.328125 C 139.742188 182.582031 138.835938 182.503906 138.324219 183.171875 Z M 138.324219 183.171875 "/>
+<path class="colorChange" style=" stroke:none;fill-rule:nonzero;fill:rgb(0,0,0);fill-opacity:1;" d="M 183.605469 183.371094 C 182.859375 183.644531 183.015625 185.023438 184.589844 192.347656 C 185.8125 197.898438 186.164062 199.039062 186.796875 199.160156 C 188.371094 199.472656 188.371094 198.6875 186.835938 191.285156 C 185.140625 183.171875 184.984375 182.777344 183.605469 183.371094 Z M 183.605469 183.371094 "/>
+</g>
+</g></svg>`
+        // Générer les SVGs selon les paramètres
+        //document.getElementById('generateBtn').addEventListener('click', () => {
+            //const rows = document.getElementById('rows').value;
+            //const columns = document.getElementById('columns').value;
+            const color = document.getElementById('color').value;
+
+            const svgContainer = document.getElementById('svgContainer');
+            svgContainer.innerHTML = '';  // Efface les SVGs précédents
+            //svgContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+            //svgContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+            //for (let i = 0; i < rows * columns; i++) {
+                const svgDiv = document.createElement('div');
+                svgDiv.innerHTML = svgTemplate.replace('#ff0000', color);
+                svgContainer.appendChild(svgDiv);
+            //}
+        //});
+
+        // Fonction pour télécharger la page
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const svgContainer = document.getElementById('svgContainer').innerHTML;
+            const blob = new Blob([svgContainer], {type: 'image/svg+xml'});
+            const url = URL.createObjectURL(blob);
+
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = url;
+            downloadLink.download = 'page_finale.svg';
+            downloadLink.style.display = 'block';
+            downloadLink.click();
+
+            URL.revokeObjectURL(url);
+        });
+
+        // Mise à jour de la couleur des SVGs lors du changement
+        document.getElementById('color').addEventListener('input', () => {
+            const color = document.getElementById('color').value;
+            document.querySelectorAll('.colorChange').forEach(elt => {
+                elt.style.fill = color
+                ;
+            });
+        });
+
+        document.getElementById('colorback').addEventListener('input', () => {
+            const color = document.getElementById('colorback').value;
+            var elt = document.querySelector('#background')
+            elt.style.fill = color
+        });
+
+
+
+
+
+
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            const fileInput = document.getElementById('fileInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';  // Afficher l'image
+                };
+
+                reader.readAsDataURL(file);  // Lire l'image comme une URL de données
+            } else {
+                alert('Veuillez sélectionner un fichier image.');
+            }
+        });
+    </script>
+
+</body>
+</html>
